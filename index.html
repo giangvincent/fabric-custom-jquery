@@ -110,13 +110,13 @@
         <div id="commands" ng-click="maybeLoadShape($event)">
 
             <ul class="nav nav-tabs">
-                <li>
+                <li class="active">
                     <a href="#simple-shapes" data-toggle="tab">Simple</a>
                 </li>
                 <li>
                     <a href="#object" data-toggle="tab">Object</a>
                 </li>
-                <li class="active">
+                <li>
                     <a href="#canvastab" data-toggle="tab">Canvas</a>
                 </li>
                 <li>
@@ -151,9 +151,9 @@
                                 <br />
                                 <p>Data text</p>
                                 <button class="btn btn-object-action" ng-click="add();">Add Item</button>
-                                <p ng-repeat="x in data track by $index">
+                                <p ng-repeat="x in data.text track by $index">
                                     <textarea class="data-text" rows="3" columns="80" ng-keyup="changeText($index);">Data text</textarea>
-                                    <button class="btn btn-object-action" ng-click="del($index);">Delete</button>
+                                    <button class="btn btn-object-action" ng-click="del($index,'text');">Delete</button>
                                     <br />
                                 </p>
                                 <!-- <textarea class="data-text" bind-value-to="data" rows="3" columns="80"></textarea>
@@ -225,6 +225,22 @@
                                 <button type="button" class="btn btn-object-action" id="text-cmd-subscript" ng-click="setSubScript()">
                                     Subscript
                                 </button>
+                            </div>
+                        </div><div id="text-wrapper" ng-show="getImage()">
+                            <div id="text-controls">
+                                
+                                <p>Image URL</p>
+                                <button class="btn btn-object-action" ng-click="addImageItem();">Add Item</button>
+                                <p ng-repeat="x in data.image track by $index">
+                                    <textarea class="data-image">URL</textarea>
+                                    <span class="input-group-btn">
+                                        <input type="file" class="file" (change)="sendFormData($index)">
+                                        <button type="button" class="btn btn-info btn-flat upload" ng-click="upload($index);" value="URL">Upload</button>
+                                    </span>
+                                    <button class="btn btn-object-action" ng-click="del($index,'image');">Delete</button>
+                                    <!-- <button class="btn btn-object-action" ng-click="upload($index);">Upload</button> -->
+                                    <br />
+                                </p>
                             </div>
                         </div>
                         <div style="margin-top:10px;">
@@ -398,7 +414,7 @@
                     </div>
                 </div>
 
-                <div class="tab-pane" id="simple-shapes">
+                <div class="tab-pane active" id="simple-shapes">
                     <p>Add
                         <strong>simple shapes</strong> to canvas:</p>
                     <p>
@@ -455,7 +471,7 @@
                     </p>
                 </div>
 
-                <div class="tab-pane active" id="canvastab">
+                <div class="tab-pane" id="canvastab">
                     <div id="global-controls">
                         <p id="complexity">
                             Canvas complexity (number of paths):

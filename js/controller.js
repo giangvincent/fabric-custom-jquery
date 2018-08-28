@@ -113,37 +113,99 @@ function addAccessors($scope) {
   $scope.getText = function() {
     return getActiveProp('text');
   };
+  
   $scope.setText = function(value) {
     setActiveProp('text', value);
   };
-
+  $scope.getImage = function () {
+    return getActiveProp('img');
+  };
+  $scope.setImage = function (value) {
+    setActiveProp('img', value);
+  };
   /*
    * Add item
   */
-  $scope.data = [];
+  $scope.data = {
+    text: ['Data text'],
+    image: ['Data image']
+  };
   $scope.add = function () {
-    this.data.push($(".data-text:last").val());
+    this.data.text.push($(".data-text:last").val());
+    console.log(this.data);
   }
-  $scope.del = function (ind) {
-    this.data = this.data.splice(ind, 1);
+  $scope.del = function (ind,type) {
+    console.log(ind, type);
+    if(type == "text"){
+      this.data.text = this.data.text.splice(ind, 1);
+      this.data.text.forEach(element => {
+        $(".data-text:eq(" + (element) + ")").val(this.data.text[element]);
+      });
+    }
+      
+    else {
+      this.data.image = this.data.image.splice(ind, 1);
+      this.data.text.forEach(element => {
+        $(".data-image:eq(" + (element) + ")").val(this.data.image[element]);
+      });
+    }
+      
+    //console.log(this.data);
   }
   $scope.changeText = function (index) {
-    console.log(index)
-    this.data[index] = $(".data-text:eq("+(index)+")").val()
-    console.log(this.data)
+    //console.log(index)
+    this.data.text[index] = $(".data-text:eq("+(index)+")").val()
+    console.log(this.data.text)
   }
-  $scope.addItem = function (ind) {
-    console.log("add item");
+  $scope.changeImage = function (index) {
+    console.log(index)
+    this.data.image[index] = $(".data-image:eq(" + (index) + ")").val()
+    console.log(this.data.image)
+  }
+  $scope.addImageItem = function () {
+    console.log(this.data);
+    //$(".data-image:last").val("URL");
+    this.data.image.push($(".data-image:last").val());
+    console.log(this.data.image);
+  }
+  $scope.upload = function (ind) {
+    //angular.element(event.target).parent().children()[0].click();
+    
+    //console.log($(".file:eq(" + (ind) + ")").prop('files'));
+    //$(".data-image:eq(" + (ind) + ")").val('files' + ind);
+    
+    //this.changeImage(ind);
+    //console.log(angular.element(event.target), ind);
+    var formData = new FormData();
+    formData.append('image', $(".file:eq(" + (ind) + ")").prop('files'));
+    
+    $.ajax({
+      url: 'http://gotests-212102.appspot.com/save_fabric',
+      dataType: 'text',
+      cache: false,
+      contentType: false,
+      processData: false,
+      data: formData,
+      type: 'POST',
+      success: function (res) {
+        
+        console.log(res)
+        $(".data-image:eq(" + (ind) + ")").val(res);
+        this.data.image[ind] = $(".data-image:eq(" + (ind) + ")").val();
+        //_this.parent().siblings().val(res);
+      }
+    });
+    console.log(this.data);
+    setActiveProp('data',this.data);
+  }
+  $scope.sendFormData = function (index) {
+    console.log("send", index);
   }
   $scope.setData = function (value) {
     setActiveProp('data', value);
   };
   $scope.getData = function () {
-    data = getActiveProp('data');
-    // data.forEach(i => {
-    //   data.push(i+1);
-    // });
-    return data;
+    return getActiveProp('data');
   };
   $scope.getTextAlign = function() {
     return capitalize(getActiveProp('textAlign'));
@@ -410,13 +472,18 @@ function addAccessors($scope) {
       originX: 'left',
       hasRotatingPoint: true,
       centerTransform: true,
-      data: ["Data text"]
+      data: {
+        text: ['Data text'],
+        image: ['Data image']
+      }
     });
     this.data = textSample.data;
     textSample.toObject = (function (toObject) {
       return function () {
         return fabric.util.object.extend(toObject.call(this), {
-          data: textSample.data
+          data: {
+            text: textSample.data.text
+          }
         });
       };
     })(textSample.toObject);
@@ -469,17 +536,32 @@ function addAccessors($scope) {
   function addImage(imageName, minScale, maxScale) {
     var coord = getRandomLeftTop();
 
-    fabric.Image.fromURL('../assets/' + imageName, function(image) {
+    fabric.Image.fromURL(imageName, function(img) {
 
-      image.set({
-        left: coord.left,
-        top: coord.top,
-        angle: getRandomInt(-10, 10)
+      img.set({
+        left: 0,
+        top: 0,
+        img: "URL",
+        data: {
+          text: ['Data text'],
+          image: ['Data image']
+        }
+        //angle: getRandomInt(-10, 10)
       })
-      .scale(getRandomNum(minScale, maxScale))
+      .scale(0.1)
       .setCoords();
-
-      canvas.add(image);
+      this.data = img.data;
+      img.toObject = (function (toObject) {
+        return function () {
+          return fabric.util.object.extend(toObject.call(this), {
+            data: {
+              image: this.data.image
+            }
+          });
+        };
+      })(img.toObject);
+      canvas.add(img);
+      //console.log(this.data);
     });
   };
 
@@ -488,7 +570,7 @@ function addAccessors($scope) {
   };
 
   $scope.addImage2 = function() {
-    addImage('logo.png', 0.1, 1);
+    addImage('https://clinicforspecialchildren.org/wp-content/uploads/2016/08/avatar-placeholder.gif', 0.1, 1);
   };
 
   $scope.addImage3 = function() {
