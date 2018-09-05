@@ -8,6 +8,8 @@
 
     <link rel="stylesheet" href="http://fabricjs.com/css/master.css">
     <link rel="stylesheet" href="http://fabricjs.com/css/prism.css">
+    <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <style>
         pre {
             margin-left: 15px !important
@@ -85,53 +87,110 @@
             }
         })();
     </script>
+    <script src="http://fabricjs.com/lib/jquery.js"></script>
 
-
-    <div id="bd-wrapper" ng-controller="CanvasControls">
-        <h2>
-            <span>Fabric.js demos</span> &middot; Kitchensink</h2>
-
-        <!--[if IE]><script src="../lib/fonts/Delicious.font.js"></script><![endif]-->
-
-        <script src="http://fabricjs.com/lib/jquery.js"></script>
-        <script src="http://fabricjs.com/lib/bootstrap.js"></script>
         <script src="http://fabricjs.com/js/paster.js"></script>
 
-        <link rel="stylesheet" href="http://fabricjs.com/css/bootstrap.css">
+
         <link rel="stylesheet" href="http://fabricjs.com/css/kitchensink.css">
 
         <link href='http://fonts.googleapis.com/css?family=Plaster' rel='stylesheet' type='text/css'>
         <link href='http://fonts.googleapis.com/css?family=Engagement' rel='stylesheet' type='text/css'>
 
-        <div style="position:relative;width:804px;float:left;" id="canvas-wrapper">
-            <canvas id="canvas" width="800" height="420"></canvas>
+
+    <button class="btn btn-info btn-lg" id="send-json-to-render">Test json render</button>
+<div id="result-from-render"></div>
+
+<div id="bd-wrapper" ng-controller="CanvasControls" ng-app="kitchensink">
+    <h2><span>Fabric.js demos</span> &middot; Kitchensink</h2>
+    <div>
+        <div style="position:relative;width:804px;float:left;" id="canvas-wrapper" tabindex="1" ng-press="activeKeyCanvas($event)">
+            <canvas id="canvas" width="800" height="420" ></canvas>
         </div>
 
         <div id="commands" ng-click="maybeLoadShape($event)">
 
             <ul class="nav nav-tabs">
-                <li class="active">
-                    <a href="#simple-shapes" data-toggle="tab">Simple</a>
-                </li>
-                <li>
-                    <a href="#object" data-toggle="tab">Object</a>
-                </li>
-                <li>
-                    <a href="#canvastab" data-toggle="tab">Canvas</a>
-                </li>
-                <li>
-                    <a href="#load-svg-pane" data-toggle="tab">Load SVG</a>
-                </li>
-                <li>
-                    <a href="#execute-code" data-toggle="tab">Execute</a>
-                </li>
-                <li>
-                    <a href="#json-inout" data-toggle="tab">JSON</a>
-                </li>
+                <li><a href="#simple-shapes" data-toggle="tab">Simple</a></li>
+                <li><a href="#object" ng-click="rerender()" data-toggle="tab">Object</a></li>
+                <li class="active"><a href="#canvastab" data-toggle="tab">Canvas</a></li>
+                <li><a href="#load-svg-pane" data-toggle="tab">Load SVG</a></li>
+                <li><a href="#execute-code" data-toggle="tab">Execute</a></li>
+                <li><a href="#json-inout" data-toggle="tab">JSON</a></li>
             </ul>
 
             <div class="tab-content">
+
+                <div class="tab-pane active" id="simple-shapes">
+                    <p><strong>Background</strong>
+                        <input type="file" id="imgLoader">
+                        <div>
+                            <label for="text-lines-bg-color">Background color:</label>
+                            <input type="color" value="" id="bg-color" size="10" class="btn-object-action">
+                        </div>
+                        <button type="button" class="btn rect" onclick="rmBackground()">Remove background</button>
+                    </p>
+                    <p>Add
+                        <strong>simple shapes</strong> to canvas:</p>
+                    <p>
+                        <button type="button" class="btn rect" ng-click="addRect()">Rectangle</button>
+                        <button type="button" class="btn circle" ng-click="addCircle()">Circle</button>
+                        <button type="button" class="btn triangle" ng-click="addTriangle()">Triangle</button>
+                        <button type="button" class="btn line" ng-click="addLine()">Line</button>
+                        <button type="button" class="btn polygon" ng-click="addPolygon()">Polygon</button>
+                    </p>
+
+                    <p>
+                        <button class="btn" ng-click="addText()">Add text</button>
+                        <button class="btn" ng-click="addIText()">Add Itext</button>
+                        <button class="btn" ng-click="addTextbox()">Add textbox</button>
+                        <button class="btn" ng-click="addPatternRect()">Add pattern rect</button>
+                    </p>
+
+                    <p>Add
+                        <strong>images</strong> to canvas:</p>
+                    <p>
+                        <button type="button" class="btn image1" ng-click="addImage1()">Image 1 (pug)</button>
+                        <button type="button" class="btn image2" ng-click="addImage2()">Image 2 (google)</button>
+                        <button type="button" class="btn image3" ng-click="addImage3()">Image 3 (printio)</button>
+                        <button type="button" class="btn image4" ng-click="addImage4()">Bunny video</button>
+                    </p>
+
+                    <p>Add
+                        <strong>gradient-based shapes</strong> to canvas:</p>
+
+                    <p>
+                        <button class="btn shape" id="shape74">Gradient 1</button>
+                        <button class="btn shape" id="shape66">Gradient 2</button>
+                        <button class="btn shape" id="shape75">Gradient 3</button>
+                        <button class="btn shape" id="shape148">Gradient 4</button>
+                    </p>
+
+                    <p>Add
+                        <strong>arcs</strong> and misc to canvas:</p>
+
+                    <p>
+                        <button class="btn shape" id="shape104">Arc(s) 1</button>
+                        <button class="btn shape" id="shape105">Arc(s) 2</button>
+                        <button class="btn shape" id="shape106">Arc(s) 3</button>
+                        <button class="btn shape" id="shape107">Arc(s) 4</button>
+                    </p>
+                    <p>
+                        <button class="btn shape" id="shape103">Transformed paths</button>
+                    </p>
+                    <p>Add
+                        <strong>Data</strong> to canvas:</p>
+                    <p>
+                        <button class="btn" ng-click="addDataText()">Add data text</button>
+                        <button class="btn" ng-click="addDataImage()">Add data image</button>
+                    </p>
+                </div>
+
                 <div class="tab-pane" id="object">
+                    <p>
+                        <button class="btn" onclick="addDataObject()">Add data to Object</button>
+                        
+                    </p>
                     <div class="object-controls" object-buttons-enabled="getSelected()">
                         <label for="color">Fill / Stroke / Background:</label>
                         <input type="color" style="width:40px" bind-value-to="fill" class="btn-object-action">
@@ -151,8 +210,8 @@
                                 <br />
                                 <p>Data text</p>
                                 <button class="btn btn-object-action" ng-click="add();">Add Item</button>
-                                <p ng-repeat="x in data.text track by $index">
-                                    <textarea class="data-text" rows="3" columns="80" ng-keyup="changeText($index);">Data text</textarea>
+                                <p ng-repeat="x in this.data.text track by $index" >
+                                    <textarea class="data-text" rows="3" columns="80" ng-keyup="changeText($index);">@{{x}}</textarea>
                                     <button class="btn btn-object-action" ng-click="del($index,'text');">Delete</button>
                                     <br />
                                 </p>
@@ -175,6 +234,8 @@
                                     <option value="hoefler text">Hoefler Text</option>
                                     <option value="plaster">Plaster</option>
                                     <option value="engagement">Engagement</option>
+                                    <option value="test font">test font</option>
+                                    <option value="UTM Facebook">UTM Facebook</option>
                                 </select>
                                 <br>
                                 <label for="text-align" style="display:inline-block">Text align:</label>
@@ -226,12 +287,13 @@
                                     Subscript
                                 </button>
                             </div>
-                        </div><div id="text-wrapper" ng-show="getImage()">
+                        </div>
+                        <div id="text-wrapper" ng-show="getImage()">
                             <div id="text-controls">
-                                
+
                                 <p>Image URL</p>
                                 <button class="btn btn-object-action" ng-click="addImageItem();">Add Item</button>
-                                <p ng-repeat="x in data.image track by $index">
+                                <p ng-repeat="x in this.data.image track by $index">
                                     <textarea class="data-image">URL</textarea>
                                     <span class="input-group-btn">
                                         <input type="file" class="file" (change)="sendFormData($index)">
@@ -414,65 +476,12 @@
                     </div>
                 </div>
 
-                <div class="tab-pane active" id="simple-shapes">
-                    <p>Add
-                        <strong>simple shapes</strong> to canvas:</p>
-                    <p>
-                        <button type="button" class="btn rect" ng-click="addRect()">Rectangle</button>
-                        <button type="button" class="btn circle" ng-click="addCircle()">Circle</button>
-                        <button type="button" class="btn triangle" ng-click="addTriangle()">Triangle</button>
-                        <button type="button" class="btn line" ng-click="addLine()">Line</button>
-                        <button type="button" class="btn polygon" ng-click="addPolygon()">Polygon</button>
-                    </p>
-
-                    <p>
-                        <button class="btn" ng-click="addText()">Add text</button>
-                        <button class="btn" ng-click="addIText()">Add Itext</button>
-                        <button class="btn" ng-click="addTextbox()">Add textbox</button>
-                        <button class="btn" ng-click="addPatternRect()">Add pattern rect</button>
-                    </p>
-
-                    <p>Add
-                        <strong>images</strong> to canvas:</p>
-                    <p>
-                        <button type="button" class="btn image1" ng-click="addImage1()">Image 1 (pug)</button>
-                        <button type="button" class="btn image2" ng-click="addImage2()">Image 2 (google)</button>
-                        <button type="button" class="btn image3" ng-click="addImage3()">Image 3 (printio)</button>
-                        <button type="button" class="btn image4" ng-click="addImage4()">Bunny video</button>
-                    </p>
-
-                    <p>Add
-                        <strong>gradient-based shapes</strong> to canvas:</p>
-
-                    <p>
-                        <button class="btn shape" id="shape74">Gradient 1</button>
-                        <button class="btn shape" id="shape66">Gradient 2</button>
-                        <button class="btn shape" id="shape75">Gradient 3</button>
-                        <button class="btn shape" id="shape148">Gradient 4</button>
-                    </p>
-
-                    <p>Add
-                        <strong>arcs</strong> and misc to canvas:</p>
-
-                    <p>
-                        <button class="btn shape" id="shape104">Arc(s) 1</button>
-                        <button class="btn shape" id="shape105">Arc(s) 2</button>
-                        <button class="btn shape" id="shape106">Arc(s) 3</button>
-                        <button class="btn shape" id="shape107">Arc(s) 4</button>
-                    </p>
-                    <p>
-                        <button class="btn shape" id="shape103">Transformed paths</button>
-                    </p>
-                    <p>Add
-                        <strong>Data</strong> to canvas:</p>
-                    <p>
-                        <button class="btn" ng-click="addDataText()">Add data text</button>
-                        <button class="btn" ng-click="addDataImage()">Add data image</button>
-                    </p>
-                </div>
-
-                <div class="tab-pane" id="canvastab">
+                <div class="tab-pane active" id="canvastab">
                     <div id="global-controls">
+                        <p>
+                            <label for="step-key">Khoảng cách khi di chuyển bằng phím mũi tên</label>
+                            <input type="text" id="step-key" value="1">
+                        </p>
                         <p id="complexity">
                             Canvas complexity (number of paths):
                             <strong>{[ canvas.complexity() ]}</strong>
@@ -556,8 +565,7 @@
                 </div>
 
                 <div class="tab-pane" id="load-svg-pane">
-                    <textarea id="svg-console" bind-value-to="consoleSVG">
-      </textarea>
+                    <textarea id="svg-console" bind-value-to="consoleSVG"></textarea>
                     <button type="button" class="btn btn-info" ng-click="loadSVG()">
                         Load as Group
                     </button>
@@ -567,38 +575,73 @@
                 </div>
 
                 <div class="tab-pane" id="execute-code">
-                    <textarea id="canvas-console" bind-value-to="console">
-        </textarea>
+                    <textarea id="canvas-console" bind-value-to="console"></textarea>
                     <button type="button" class="btn btn-info" ng-click="execute()">Execute</button>
                 </div>
 
                 <div class="tab-pane" id="json-inout">
-                    <textarea id="json-console" bind-value-to="consoleJSON">
-      </textarea>
-                    <button type="button" class="btn btn-info" ng-click="loadJSON()">
-                        Load
-                    </button>
-                    <button type="button" class="btn btn-info" ng-click="saveJSON()">
-                        Save
-                    </button>
+                    <div class="form-group {!! !$errors->has($errorKey) ?: 'has-error' !!}">
+
+
+                        <div class="col-sm-12">
+
+         
+                            <textarea class="form-control " name="kitchensink" placeholder="" id="json-console" bind-value-to="consoleJSON"></textarea>
+                            <button type="button" class="btn btn-info" ng-click="loadJSON()">
+                                Load Canvas
+                            </button>
+                            <button type="button" class="btn btn-info" ng-click="saveJSON()">
+                                Save Canvas
+                            </button>
+
+   
+
+                        </div>
+                    </div>
                 </div>
 
             </div>
 
         </div>
         <div style="min-width: 800px; width: 800px;">
-            rasterized canvas:
-            <br />
-            <img id="canvasRasterizer" />
-            <br /> svg canvas:
-            <br />
+            rasterized canvas:<br />
+            <img id="canvasRasterizer" /><br />
+            svg canvas:<br />
             <div id="SVGRasterizer" style="display: inline-block" />
         </div>
-        <!-- <script src="../../lib/centering_guidelines.js"></script>
-<script src="../../lib/aligning_guidelines.js"></script> -->
+    </div>
+</div>
 
-        <script src="http://fabricjs.com/lib/font_definitions.js"></script>
+<!-- Modal edit data -->
+<div class="modal fade" id="objectData" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Modal title</h4>
+            </div>
+            <div class="modal-body">
 
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-info" id="addItem">Add Items</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="http://fabricjs.com/lib/font_definitions.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <script>
+        var consoleJSON = (
+            '{"version":"2.3.6","objects":[]}'
+        );
+        var fabricJSON = jQuery.parseJSON(consoleJSON)
+        
+    </script>
         <script>
             var kitchensink = {};
             var canvas = new fabric.Canvas('canvas');
@@ -609,130 +652,359 @@
         <script src="js/controller.js"></script>
 
         <script>
+    
+    $(document).on('click', '#bd-wrapper button', function(e) {
+        e.preventDefault();
+    });
+    (function() {
 
-            (function () {
-                function renderVieportBorders() {
-                    var ctx = canvas.getContext();
 
-                    ctx.save();
+        function renderVieportBorders() {
+            var ctx = canvas.getContext();
 
-                    ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.save();
 
-                    ctx.fillRect(
-                        canvas.viewportTransform[4],
-                        canvas.viewportTransform[5],
-                        canvas.getWidth() * canvas.getZoom(),
-                        canvas.getHeight() * canvas.getZoom());
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
 
-                    ctx.setLineDash([5, 5]);
+            ctx.fillRect(
+                canvas.viewportTransform[4],
+                canvas.viewportTransform[5],
+                canvas.getWidth() * canvas.getZoom(),
+                canvas.getHeight() * canvas.getZoom());
 
-                    ctx.strokeRect(
-                        canvas.viewportTransform[4],
-                        canvas.viewportTransform[5],
-                        canvas.getWidth() * canvas.getZoom(),
-                        canvas.getHeight() * canvas.getZoom());
+            ctx.setLineDash([5, 5]);
 
-                    ctx.restore();
+            ctx.strokeRect(
+                canvas.viewportTransform[4],
+                canvas.viewportTransform[5],
+                canvas.getWidth() * canvas.getZoom(),
+                canvas.getHeight() * canvas.getZoom());
+
+            ctx.restore();
+        }
+        canvas.on('object:selected', function(opt) {
+            var target = opt.target;
+            if (target._cacheCanvas) {
+
+            }
+        })
+
+
+        canvas.on('mouse:wheel', function(opt) {
+            var e = opt.e;
+            if (!e.ctrlKey) {
+                return;
+            }
+            var newZoom = canvas.getZoom() + e.deltaY / 300;
+            canvas.zoomToPoint({
+                x: e.offsetX,
+                y: e.offsetY
+            }, newZoom);
+
+            renderVieportBorders();
+            e.preventDefault();
+            return false;
+        });
+
+        var viewportLeft = 0,
+            viewportTop = 0,
+            mouseLeft,
+            mouseTop,
+            _drawSelection = canvas._drawSelection,
+            isDown = false;
+
+        canvas.on('mouse:down', function(options) {
+            if (options.e.altKey) {
+                isDown = true;
+
+                viewportLeft = canvas.viewportTransform[4];
+                viewportTop = canvas.viewportTransform[5];
+
+                mouseLeft = options.e.x;
+                mouseTop = options.e.y;
+                _drawSelection = canvas._drawSelection;
+                canvas._drawSelection = function() {};
+                renderVieportBorders();
+            }
+        });
+
+        canvas.on('mouse:move', function(options) {
+            if (options.e.altKey && isDown) {
+                var currentMouseLeft = options.e.x;
+                var currentMouseTop = options.e.y;
+
+                var deltaLeft = currentMouseLeft - mouseLeft,
+                    deltaTop = currentMouseTop - mouseTop;
+
+                canvas.viewportTransform[4] = viewportLeft + deltaLeft;
+                canvas.viewportTransform[5] = viewportTop + deltaTop;
+
+                canvas.renderAll();
+                renderVieportBorders();
+            }
+        });
+
+        canvas.on('mouse:up', function() {
+            canvas._drawSelection = _drawSelection;
+            isDown = false;
+        });
+
+        var textItem = function (data , ind){
+            return ''+
+                '<div class="form-group">'+
+                    '<div class="col-md-9">'+               
+                        '<textarea class="form-control dataTextItem" ind="'+ ind +'">'+ data +'</textarea>'+
+                    '</div>'+
+                    '<div class="col-md-3" ind="'+ ind +'">'+
+                        '<button class="btn btn-danger deleteItem">Delete item</button>'+
+                    '</div>'+
+                '</div>';
+        }
+        var imageItem = function (data , ind){
+            return ''+
+                '<div class="form-group">'+
+                    '<label class="col-md-2 control-label" for="filebutton">Image Url</label>'+
+                    '<div class="col-md-8">'+
+                        '<div class="col-md-8">'+
+                            '<input class="file imageFile" type="file" ind="'+ ind +'">'+
+                        '</div>'+
+                        '<div class="col-md-4">'+
+                            '<button class="btn btn-info btn-flat saveImageItem">Save</button>'+
+                        '</div>'+
+                    '</div>'+
+                    '<div class="col-md-12" ind="'+ ind +'">'+              
+                        '<textarea class="form-control dataImageItem" ind="'+ ind +'">'+ data +'</textarea>'+
+                        '<button class="btn btn-danger deleteItem">Delete</button>'+
+                    '</div>'+
+                '</div>';
+        }
+
+        $(document).on('click', '#addItem', function(event) {
+            event.preventDefault();
+            /* Act on the event */
+            var activeObject = canvas.getActiveObject();
+
+            if ('data' in activeObject) {
+                var data  = activeObject.data;
+                if (activeObject.type == 'textbox') {
+                    data.text.push('Data Text'); 
+                    var i = activeObject.data.text.length - 1;
+                    setAttr('data' , data , activeObject);
+                    console.log(data);
+                    $('#objectData').find('.modal-body').append(textItem( activeObject.data.text[i] , i));
+                
                 }
-                canvas.on('object:selected', function (opt) {
-                    var target = opt.target;
-                    if (target._cacheCanvas) {
+                if (activeObject.type == 'image') {
+                    data.image.push('Data Image Url'); 
+                    var i = activeObject.data.image.length - 1;
+                    setAttr('data' , data , activeObject);
+                    $('#objectData').find('.modal-body').append(imageItem( activeObject.data.image[i] , i));
+                }
+            }
+        });
 
-                    }
-                })
+        $(document).on('change', '.dataTextItem', function(event) {
+            event.preventDefault();
+            /* Act on the event */
+            var activeObject = canvas.getActiveObject();
+            if ('data' in activeObject) {
+                var data  = activeObject.data;
+                data.text[$(this).attr('ind')] = $(this).val();
+                setAttr('data' , data , activeObject);
+            }
+        });
 
+        $(document).on('change', '.dataImageItem', function(event) {
+            event.preventDefault();
+            /* Act on the event */
+            var activeObject = canvas.getActiveObject();
+            if ('data' in activeObject) {
+                var data  = activeObject.data;
+                data.image[$(this).attr('ind')] = $(this).val();
+                setAttr('data' , data , activeObject);
+            }
+        });
 
-                canvas.on('mouse:wheel', function (opt) {
-                    var e = opt.e;
-                    if (!e.ctrlKey) {
-                        return;
-                    }
-                    var newZoom = canvas.getZoom() + e.deltaY / 300;
-                    canvas.zoomToPoint({ x: e.offsetX, y: e.offsetY }, newZoom);
+        $(document).on('click', '.deleteItem', function(event) {
+            event.preventDefault();
+            /* Act on the event */
+            var activeObject = canvas.getActiveObject();
+            if ('data' in activeObject) {
+                var data  = activeObject.data;
+                var ind = $(this).parent().attr('ind');
+                if (activeObject.type == 'textbox') {
+                    data.text.splice(ind, 1);
+                    setAttr('data' , data , activeObject);
+                }
+                if (activeObject.type == 'image') {
+                    data.image.splice(ind, 1);
+                    setAttr('data' , data , activeObject);
+                }
+                $(this).parent().parent().remove();
+            }
+        });
 
-                    renderVieportBorders();
-                    e.preventDefault();
-                    return false;
-                });
-
-                var viewportLeft = 0,
-                    viewportTop = 0,
-                    mouseLeft,
-                    mouseTop,
-                    _drawSelection = canvas._drawSelection,
-                    isDown = false;
-
-                canvas.on('mouse:down', function (options) {
-                    if (options.e.altKey) {
-                        isDown = true;
-
-                        viewportLeft = canvas.viewportTransform[4];
-                        viewportTop = canvas.viewportTransform[5];
-
-                        mouseLeft = options.e.x;
-                        mouseTop = options.e.y;
-                        _drawSelection = canvas._drawSelection;
-                        canvas._drawSelection = function () { };
-                        renderVieportBorders();
-                    }
-                });
-
-                canvas.on('mouse:move', function (options) {
-                    if (options.e.altKey && isDown) {
-                        var currentMouseLeft = options.e.x;
-                        var currentMouseTop = options.e.y;
-
-                        var deltaLeft = currentMouseLeft - mouseLeft,
-                            deltaTop = currentMouseTop - mouseTop;
-
-                        canvas.viewportTransform[4] = viewportLeft + deltaLeft;
-                        canvas.viewportTransform[5] = viewportTop + deltaTop;
-
-                        canvas.renderAll();
-                        renderVieportBorders();
-                    }
-                });
-
-                canvas.on('mouse:up', function () {
-                    canvas._drawSelection = _drawSelection;
-                    isDown = false;
-                });
-            })();
-
-        </script>
-
-    </div>
-
-    <script>
-        (function () {
-            var mainScriptEl = document.getElementById('main');
-            if (!mainScriptEl) return;
-            var preEl = document.createElement('pre');
-            var codeEl = document.createElement('code');
-            codeEl.innerHTML = mainScriptEl.innerHTML;
-            codeEl.className = 'language-javascript';
-            preEl.appendChild(codeEl);
-            document.getElementById('bd-wrapper').appendChild(preEl);
-        })();
-    </script>
-
-    <script>
-        (function () {
-            fabric.util.addListener(fabric.window, 'load', function () {
-                var canvas = this.__canvas || this.canvas,
-                    canvases = this.__canvases || this.canvases;
-
-                canvas && canvas.calcOffset && canvas.calcOffset();
-
-                if (canvases && canvases.length) {
-                    for (var i = 0, len = canvases.length; i < len; i++) {
-                        canvases[i].calcOffset();
+        fabric.util.addListener(document.getElementById('canvas-wrapper'), 'dblclick', function(options) {
+            //console.log(options);
+            var activeObject = canvas.getActiveObject();
+            console.log(activeObject.data);
+            if ('data' in activeObject) {
+                if (activeObject.type == 'textbox') {
+                    $('#objectData').find('.modal-title').html('Edit textbox :"' + activeObject.text + '"');
+                    $('#objectData').find('.modal-body').html('');
+                    for (var i = activeObject.data.text.length - 1; i >= 0; i--) {
+                        $('#objectData').find('.modal-body').append(textItem( activeObject.data.text[i] , i));
                     }
                 }
-            });
-        })();
-    </script>
+                if (activeObject.type == 'image') {
+                    $('#objectData').find('.modal-title').html('Edit Image (' + canvas.getObjects().indexOf(activeObject) + ' )');
+                    $('#objectData').find('.modal-body').html('');
+                    for (var i = activeObject.data.image.length - 1; i >= 0; i--) {
+                        $('#objectData').find('.modal-body').append(imageItem( activeObject.data.image[i] , i));
+                    }
+                }
+                $('#objectData').modal('show');
+            }
+            
+        });
+        
+        /*detect keypress to canvas : ex : arrow key input && delete key*/
+        var STEP = 1;
 
+        var Direction = {
+          LEFT: 0,
+          UP: 1,
+          RIGHT: 2,
+          DOWN: 3
+        };
+
+        fabric.util.addListener(document.getElementById('canvas-wrapper'), 'keydown', function(options) {
+            
+            options.preventDefault();
+          /*if (options.repeat) {
+            return;
+          }*/
+          STEP = ($("#step-key").val() > 0) ? parseInt($("#step-key").val()) : 1;
+          var key = options.which || options.keyCode; // key detection
+          if (key === 37) { // handle Left key
+            moveSelected(Direction.LEFT);
+          } else if (key === 38) { // handle Up key
+            moveSelected(Direction.UP);
+          } else if (key === 39) { // handle Right key
+            moveSelected(Direction.RIGHT);
+          } else if (key === 40) { // handle Down key
+            moveSelected(Direction.DOWN);
+          } else if(key === 46) {
+            var activeObjects = canvas.getActiveObjects();
+                canvas.discardActiveObject()
+                if (activeObjects.length) {
+                  canvas.remove.apply(canvas, activeObjects);
+                }
+          }
+        });
+
+        function moveSelected(direction) {
+            var activeObject = canvas.getActiveObject();
+
+          if (activeObject) {
+            switch (direction) {
+              case Direction.LEFT:
+
+                activeObject.left -= STEP;
+                break;
+              case Direction.UP:
+                activeObject.top -= STEP;
+                break;
+              case Direction.RIGHT:
+                activeObject.left += STEP;
+                break;
+              case Direction.DOWN:
+                activeObject.top += STEP;
+                break;
+            }
+            activeObject.setCoords();
+            canvas.renderAll();
+            //console.log('selected objects was moved');
+          }  else {
+            console.log('no object selected');
+          }
+
+        }
+    })();
+    (function() {
+        var mainScriptEl = document.getElementById('main');
+        if (!mainScriptEl) return;
+        var preEl = document.createElement('pre');
+        var codeEl = document.createElement('code');
+        codeEl.innerHTML = mainScriptEl.innerHTML;
+        codeEl.className = 'language-javascript';
+        preEl.appendChild(codeEl);
+        document.getElementById('bd-wrapper').appendChild(preEl);
+    })();
+    (function() {
+        fabric.util.addListener(fabric.window, 'load', function() {
+            var canvas = this.__canvas || this.canvas,
+                canvases = this.__canvases || this.canvases;
+
+            canvas && canvas.calcOffset && canvas.calcOffset();
+
+            if (canvases && canvases.length) {
+                for (var i = 0, len = canvases.length; i < len; i++) {
+                    canvases[i].calcOffset();
+                }
+            }
+        });
+    })();
+
+    $(document).on('click', '#send-json-to-render', function(event) {
+        event.preventDefault();
+        console.log('sending..');
+        var infoApp = {'app_id': 1 };
+        var renderJson = 
+        {
+            "setting": {
+                "storage" : "gcs",
+                "key" : "test/fabric",
+                "contentType": "image/jpg",
+                "domainS3" : "https://s3.amazonaws.com/result.allquiz.net",
+                "domainGcs" : "https://storage.cloud.google.com/result.allquiz.net"
+            },
+            "json": $('#json-console').val(),
+            "width": 800,
+            "height": 420,
+            "info": infoApp,
+            "accessKey": 15032017
+        };
+        //console.log(renderJson);
+        $('#result-from-render').html('');
+        $.ajax({
+            url: 'http://142.93.91.50:3000',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(renderJson),
+            success: function(data){
+                console.log(data);
+                $('#result-from-render').html('<pre>'+JSON.stringify(data)+'</pre>');
+                if (data.success) {
+                    $('#result-from-render').append('<img src="'+data.url+'?m='+new Date().getTime()+'" class="img-responsive"/>');
+                }
+            }
+        })
+        .done(function() {
+            console.log("success send json");
+        })
+        .fail(function() {
+            console.log("error");
+        })
+        .always(function() {
+            console.log("complete send json");
+        });
+        
+    });
+
+
+</script>
 
 </body>
 

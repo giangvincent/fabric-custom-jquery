@@ -1,3 +1,69 @@
+function rmBackground(){
+  canvas.backgroundColor = "white";
+  delete canvas.backgroundImage;
+  canvas.renderAll();
+}
+$(document).on('change', '#bg-color', function(event) {
+  event.preventDefault();
+  /* Act on the event */
+  canvas.backgroundColor = $(this).val() ;
+  canvas.renderAll();
+});
+
+function addDataObject(){
+  var activeObject = canvas.getActiveObject();
+  if (activeObject.type == 'textbox') {
+    var data = {
+      text : ['Data Text']
+    };
+    setAttr('data' , data , activeObject);
+  }
+  if (activeObject.type == 'image') {
+    var data = {
+      image : ['Data image Url']
+    };
+    setAttr('data' , data , activeObject);
+  }
+}
+
+function setAttr(name , value , ob){
+    ob.toObject = (function (toObject) {
+      return function () {
+        return fabric.util.object.extend(toObject.call(this), {
+           [name] : value
+        });
+      };
+    })(ob.toObject);
+}
+
+document.getElementById('imgLoader').onchange = function handleImage(e) {
+
+  var reader = new FileReader();
+  reader.onload = function (event) {
+    
+    var imgObj = new Image();
+    imgObj.src = event.target.result;
+    imgObj.onload = function () {
+      // start fabricJS stuff
+
+      var image = new fabric.Image(imgObj);
+      image.set({
+        left: 0,
+        top: 0,
+        angle: 0,
+        padding: 0,
+        cornersize: 0
+      });
+      //image.scale(getRandomNum(0.1, 0.25)).setCoords();
+      canvas.setBackgroundImage(image);
+      canvas.renderAll();
+
+      // end fabricJS stuff
+    }
+
+  }
+  reader.readAsDataURL(e.target.files[0]);
+}
 function getActiveStyle(styleName, object) {
   object = object || canvas.getActiveObject();
   if (!object) return '';
@@ -126,13 +192,20 @@ function addAccessors($scope) {
   /*
    * Add item
   */
-  $scope.data = {
+  /*$scope.data = {
     text: ['Data text'],
     image: ['Data image']
-  };
+  };*/
   $scope.add = function () {
-    this.data.text.push($(".data-text:last").val());
-    console.log(this.data);
+    var __this = canvas.getActiveObject();
+    if('text' in __this.data)
+      __this.data.text.push('data text');
+    else __this.data = {
+      text: ['Data text'],
+      image: ['Data image']
+    }
+    console.log(__this.data);
+    setActiveProp('data', __this.data);
   }
   $scope.del = function (ind,type) {
     console.log(ind, type);
@@ -152,10 +225,16 @@ function addAccessors($scope) {
       
     //console.log(this.data);
   }
+  var ob;
+  $(document).on('click', 'textarea', function(event) {
+    event.preventDefault();
+    ob = $(this);
+  });
   $scope.changeText = function (index) {
     //console.log(index)
-    this.data.text[index] = $(".data-text:eq("+(index)+")").val()
-    console.log(this.data.text)
+    var this_data = canvas.getActiveObject().data;
+    this_data.text[index] = ob.val();
+    console.log(this_data.text);
   }
   $scope.changeImage = function (index) {
     console.log(index)
@@ -168,6 +247,10 @@ function addAccessors($scope) {
     this.data.image.push($(".data-image:last").val());
     console.log(this.data.image);
   }
+  function setDataImage(data, ind) {
+    this.data.image[ind] = data;
+    setActiveProp('data', this.data);
+  }
   $scope.upload = function (ind) {
     //angular.element(event.target).parent().children()[0].click();
     
@@ -177,8 +260,8 @@ function addAccessors($scope) {
     //this.changeImage(ind);
     //console.log(angular.element(event.target), ind);
     var formData = new FormData();
-    formData.append('image', $(".file:eq(" + (ind) + ")").prop('files'));
-    
+    formData.append('image', $(".file:eq(" + (ind) + ")")[0].files[0]);
+    //console.log(formData)
     $.ajax({
       url: 'http://gotests-212102.appspot.com/save_fabric',
       dataType: 'text',
@@ -189,14 +272,45 @@ function addAccessors($scope) {
       type: 'POST',
       success: function (res) {
         
-        console.log(res)
+        //console.log(res)
         $(".data-image:eq(" + (ind) + ")").val(res);
-        this.data.image[ind] = $(".data-image:eq(" + (ind) + ")").val();
+        setDataImage(res,ind);
         //_this.parent().siblings().val(res);
       }
     });
-    console.log(this.data);
-    setActiveProp('data',this.data);
+    //console.log(this.data);
+    
+  }
+
+  $scope.rerender = function() {
+    //console.log(canvas.getActiveObject());
+    if(canvas.getActiveObject())
+    {
+      var mdata = canvas.getActiveObject().data;
+      console.log(mdata);
+      if (mdata) {
+
+        if ('text' in mdata && mdata.text != '') {
+          console.log('text')
+          mdata.text.forEach(function (value, i) {
+            $(".data-text:eq(" + (i) + ")").val(value);
+          });
+        } else mdata.text = ['Data text'];
+        if ('image' in mdata && mdata.image != '') {
+          console.log('image')
+          mdata.image.forEach(function (value, i) {
+            $(".data-image:eq(" + (i) + ")").val(value);
+          });
+        } else mdata.image = ['Data image'];
+      } else {
+        this.data = {
+          text: ['Data text'],
+          image: ['Data image']
+        }
+        setActiveProp('data', this.data);
+      }
+    }
+      
   }
   $scope.sendFormData = function (index) {
     console.log("send", index);
@@ -215,10 +329,10 @@ function addAccessors($scope) {
   };
 
   $scope.getFontFamily = function() {
-    return getActiveProp('fontFamily').toLowerCase();
+    return getActiveProp('fontFamily');
   };
   $scope.setFontFamily = function(value) {
-    setActiveProp('fontFamily', value.toLowerCase());
+    setActiveProp('fontFamily', value);
   };
 
   $scope.getBgColor = function() {
@@ -460,7 +574,7 @@ function addAccessors($scope) {
   $scope.addDataText = function () {
     var text = 'Data text';
     
-    var textSample = new fabric.IText(text, {
+    var textSample = new fabric.Textbox(text, {
       left: getRandomInt(350, 400),
       top: getRandomInt(350, 400),
       fontFamily: 'helvetica',
@@ -495,7 +609,7 @@ function addAccessors($scope) {
 
     var coord = getRandomLeftTop();
 
-    fabric.loadSVGFromURL('../assets/' + shapeName + '.svg', function(objects, options) {
+    fabric.loadSVGFromURL('/vendor/laravel-admin/kitchensink/assets/' + shapeName + '.svg', function(objects, options) {
 
       var loadedObject = fabric.util.groupSVGElements(objects, options);
 
@@ -574,7 +688,7 @@ function addAccessors($scope) {
   };
 
   $scope.addImage3 = function() {
-    addImage('printio.png', 0.5, 0.75);
+    addImage('assets/printio.png', 0.5, 0.75);
   };
 
   $scope.addImage4 = function() {
@@ -889,15 +1003,15 @@ function addAccessors($scope) {
     '}));\n'
   );
 
-  var consoleJSONValue = (
+  /*var consoleJSON = (
     '{"version":"2.3.6","objects":[]}'
-  );
+  );*/
 
   $scope.getConsoleJSON = function() {
-    return consoleJSONValue;
+    return consoleJSON;
   };
   $scope.setConsoleJSON = function(value) {
-    consoleJSONValue = value;
+    consoleJSON = value;
   };
   $scope.getConsoleSVG = function() {
     return consoleSVGValue;
@@ -945,15 +1059,19 @@ function addAccessors($scope) {
   };
 
   $scope.loadJSON = function() {
-    _loadJSON(consoleJSONValue);
+    _loadJSON(consoleJSON);
   };
 
   var _loadJSON = function(json) {
     canvas.loadFromJSON(json, function(){
+
       canvas.renderAll();
+      for (var i = fabricJSON.objects.length - 1; i >= 0; i--) {
+        setAttr('data' , fabricJSON.objects[i].data , canvas.getObjects()[i]);
+      }
     });
   };
-
+  _loadJSON(consoleJSON);
   function initCustomization() {
     if (typeof Cufon !== 'undefined' && Cufon.fonts.delicious) {
       Cufon.fonts.delicious.offsetLeft = 75;
@@ -1164,7 +1282,7 @@ function addAccessors($scope) {
 
   function initImagePatternBrush() {
     var img = new Image();
-    img.src = '../assets/honey_im_subtle.png';
+    img.src = '/vendor/laravel-admin/kitchensink/assets/honey_im_subtle.png';
 
     $scope.texturePatternBrush = new fabric.PatternBrush(canvas);
     $scope.texturePatternBrush.source = img;
